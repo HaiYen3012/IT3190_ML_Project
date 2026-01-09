@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penguin Species Classification Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #2c3e50;
+        }
+        
+        .model-selector {
+            margin: 20px 0;
+        }
+        
+        .model-selector h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .model-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .model-btn {
+            padding: 10px;
+            border: 1px solid #2c3e50;
+            background: white;
+            color: #2c3e50;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .model-btn:hover {
+            background: #34495e;
+            color: white;
+        }
+        
+        .model-btn.active {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .sample-data-btn {
+            background: #95a5a6;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .sample-data-btn:hover {
+            background: #7f8c8d;
+        }
+        
+        .results-section {
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .results-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .result-card h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .prediction {
+            font-size: 1.2em;
+            color: #27ae60;
+            font-weight: bold;
+            margin: 12px 0;
+            padding: 12px;
+            background: #d5f4e6;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .probabilities {
+            margin-top: 12px;
+        }
+        
+        .prob-bar {
+            margin-bottom: 8px;
+        }
+        
+        .prob-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 0.9em;
+        }
+        
+        .prob-progress {
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .prob-fill {
+            height: 100%;
+            background: #3498db;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fadbd8;
+            color: #c0392b;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .info-box {
+            background: #e8f8f5;
+            border-left: 3px solid #16a085;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Penguin Species Classification</h1>
+            <p>Demo các mô hình Machine Learning</p>
+        </div>
+        <div class="main-content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Nhập dữ liệu Penguin</h2>
+                
+                <button class="sample-data-btn" onclick="fillSampleData()">
+                    Điền dữ liệu mẫu
+                </button>
+                
+                <div id="inputForm">
+                    <div class="form-group">
+                        <label>Culmen Length (mm):</label>
+                        <input type="number" id="feature0" step="0.01" value="39.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Culmen Depth (mm):</label>
+                        <input type="number" id="feature1" step="0.01" value="18.7">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Flipper Length (mm):</label>
+                        <input type="number" id="feature2" step="0.01" value="181.0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Body Mass (g):</label>
+                        <input type="number" id="feature3" step="0.01" value="3750">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Delta 15 N:</label>
+                        <input type="number" id="feature4" step="0.01" value="8.5">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Delta 13 C:</label>
+                        <input type="number" id="feature5" step="0.01" value="-25.5">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sex (0=Female, 1=Male):</label>
+                        <input type="number" id="feature6" min="0" max="1" value="1">
+                    </div>
+                </div>
+                
+                <div class="model-selector">
+                    <h3>Chọn Model:</h3>
+                    <div class="model-buttons">
+                        <button class="model-btn" onclick="selectModel('ann')">ANN</button>
+                        <button class="model-btn" onclick="selectModel('knn')">KNN</button>
+                        <button class="model-btn" onclick="selectModel('naive_bayes')">Naive Bayes</button>
+                        <button class="model-btn" onclick="selectModel('random_forest')">Random Forest</button>
+                        <button class="model-btn" onclick="selectModel('k_means')">K-Means</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="predictSingle()">
+                        Dự đoán
+                    </button>
+                    <button class="btn btn-success" onclick="predictAll()">
+                        Dự đoán tất cả
+                    </button>
+                </div>
+                
+                <div class="info-box">
+                    <strong>Hướng dẫn:</strong><br>
+                    - Nhập thông tin penguin hoặc dùng dữ liệu mẫu<br>
+                    - Chọn 1 model để dự đoán riêng<br>
+                    - Hoặc nhấn "Dự đoán tất cả" để so sánh kết quả
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="results-section">
+                <h2>Kết quả dự đoán</h2>
+                <div id="results">
+                    <div class="info-box">
+                        <strong>Models đã train:</strong><br>
+                        - ANN (Artificial Neural Network)<br>
+                        - KNN (K-Nearest Neighbors)<br>
+                        - Naive Bayes<br>
+                        - Random Forest<br>
+                        - K-Means (Clustering)<br>
+                        <br>
+                        <em>Chọn model và nhập dữ liệu để bắt đầu!</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedModel = null;
+        
+        function selectModel(modelName) {
+            selectedModel = modelName;
+            // Update UI
+            document.querySelectorAll('.model-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function getFeatures() {
+            const features = [];
+            for (let i = 0; i < 7; i++) {
+                const value = parseFloat(document.getElementById(`feature${i}`).value);
+                if (isNaN(value)) {
+                    alert(`Vui lòng nhập giá trị hợp lệ cho feature ${i + 1}`);
+                    return null;
+                }
+                features.push(value);
+            }
+            return features;
+        }
+        
+        function fillSampleData() {
+            // Sample data cho Adelie penguin
+            const sampleData = [39.1, 18.7, 181.0, 3750, 8.5, -25.5, 1];
+            sampleData.forEach((value, index) => {
+                document.getElementById(`feature${index}`).value = value;
+            });
+        }
+        
+        async function predictSingle() {
+            if (!selectedModel) {
+                alert('Vui lòng chọn model trước!');
+                return;
+            }
+            
+            const features = getFeatures();
+            if (!features) return;
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel,
+                        features: features
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displaySingleResult(data);
+                } else {
+                    displayError(data.error);
+                }
+            } catch (error) {
+                displayError('Lỗi kết nối: ' + error.message);
+            }
+        }
+        
+        async function predictAll() {
+            const features = getFeatures();
+            if (!features) return;
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/predict_all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        features: features
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayAllResults(data.results);
+                } else {
+                    displayError(data.error);
+                }
+            } catch (error) {
+                displayError('Lỗi kết nối: ' + error.message);
+            }
+        }
+        
+        function showLoading() {
+            document.getElementById('results').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Đang dự đoán...</p>
+                </div>
+            `;
+        }
+        
+        function displaySingleResult(result) {
+            const html = createResultCard(result);
+            document.getElementById('results').innerHTML = html;
+        }
+        
+        function displayAllResults(results) {
+            const html = results.map(result => {
+                if (result.error) {
+                    return `
+                        <div class="result-card">
+                            <h3><span class="model-icon">${result.model}</span></h3>
+                            <div class="error">Lỗi: ${result.error}</div>
+                        </div>
+                    `;
+                }
+                return createResultCard(result);
+            }).join('');
+            
+            document.getElementById('results').innerHTML = html;
+        }
+        
+        function createResultCard(result) {
+            const probBars = Object.entries(result.probabilities)
+                .map(([species, prob]) => `
+                    <div class="prob-bar">
+                        <div class="prob-label">
+                            <span>${species}</span>
+                            <span>${prob}%</span>
+                        </div>
+                        <div class="prob-progress">
+                            <div class="prob-fill" style="width: ${prob}%">
+                                ${prob > 10 ? prob + '%' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            
+            return `
+                <div class="result-card">
+                    <h3>${result.model.toUpperCase()}</h3>
+                    <div class="prediction">
+                        Dự đoán: ${result.predicted_species}
+                    </div>
+                    <div class="probabilities">
+                        <h4 style="margin-bottom: 10px; font-size: 0.95em;">Xác suất cho mỗi loài:</h4>
+                        ${probBars}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function displayError(error) {
+            document.getElementById('results').innerHTML = `
+                <div class="error">
+                    <strong>Lỗi:</strong><br>
+                    ${error}
+                </div>
+            `;
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                if (selectedModel) {
+                    predictSingle();
+                }
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'Enter') {
+                predictAll();
+            }
+        });
+    </script>
+</body>
+</html>
