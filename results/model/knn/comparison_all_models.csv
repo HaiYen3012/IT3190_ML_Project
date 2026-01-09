@@ -1,0 +1,17 @@
+k,weights,samples,accuracy
+3,distance,110,1.0
+3,uniform,110,1.0
+5,distance,110,1.0
+5,uniform,110,1.0
+7,uniform,110,1.0
+7,distance,110,1.0
+7,uniform,170,1.0
+7,distance,170,1.0
+5,distance,170,1.0
+5,uniform,170,1.0
+1,distance,110,0.9852941176470589
+1,uniform,110,0.9852941176470589
+1,distance,170,0.9852941176470589
+1,uniform,170,0.9852941176470589
+3,distance,170,0.9705882352941176
+3,uniform,170,0.9705882352941176
